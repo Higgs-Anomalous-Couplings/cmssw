@@ -67,7 +67,7 @@ float EnergyScaleCorrection::smearingSigma(int runnr, double et, double eta, dou
 {
   const SmearCorrection* smearCorr = getSmearCorr(runnr,et,eta,r9,gainSeed);
 						  
-  if(smearCorr!=nullptr) return smearCorr->sigma(nrSigmaRho,nrSigmaPhi);
+  if(smearCorr!=nullptr) return smearCorr->sigma(et, nrSigmaRho,nrSigmaPhi);
   else return kDefaultSmearVal_;
 }
 
@@ -76,7 +76,7 @@ const EnergyScaleCorrection::ScaleCorrection*
 EnergyScaleCorrection::getScaleCorr(unsigned int runnr, double et, double eta, double r9,
 				    unsigned int gainSeed) const
 {
-
+	eta=fabs(eta);
   // buld the category based on the values of the object
   CorrectionCategory category(runnr, et, eta, r9, gainSeed);
   auto result = std::equal_range(scales_.begin(),scales_.end(),category,Sorter<CorrectionCategory,ScaleCorrection>()); 
@@ -102,7 +102,7 @@ const EnergyScaleCorrection::SmearCorrection*
 EnergyScaleCorrection::getSmearCorr(unsigned int runnr, double et, double eta, double r9,
 				    unsigned int gainSeed) const
 {
-
+	eta=fabs(eta);
   // buld the category based on the values of the object
   CorrectionCategory category(runnr, et, eta, r9, gainSeed);
   auto result = std::equal_range(smearings_.begin(),smearings_.end(),category,Sorter<CorrectionCategory,SmearCorrection>()); 
@@ -138,8 +138,6 @@ void EnergyScaleCorrection::addScale(const std::string& category, int runMin, in
   
   ScaleCorrection corr(energyScale,energyScaleErrStat,energyScaleErrSyst,energyScaleErrGain);
   scales_.push_back({cat,corr});
-  std::sort(scales_.begin(),scales_.end(),Sorter<CorrectionCategory,ScaleCorrection>()); 
-  
 }
 
 void EnergyScaleCorrection::addSmearing(const std::string& category,int runMin, int runMax,
@@ -157,7 +155,6 @@ void EnergyScaleCorrection::addSmearing(const std::string& category,int runMin, 
   
   SmearCorrection corr(rho,errRho,phi,errPhi,eMean,errEMean);
   smearings_.push_back({cat,corr});
-  std::sort(smearings_.begin(),smearings_.end(),Sorter<CorrectionCategory,SmearCorrection>());
 }
 
 
@@ -188,6 +185,8 @@ void EnergyScaleCorrection::readScalesFromFile(const std::string& filename)
 	 >> energyScale >> energyScaleErr >> energyScaleErrStat >> energyScaleErrSyst >> energyScaleErrGain;
     addScale(category, runMin, runMax, energyScale, energyScaleErrStat, energyScaleErrSyst, energyScaleErrGain);
   }
+  
+  std::sort(scales_.begin(),scales_.end(),Sorter<CorrectionCategory,ScaleCorrection>());
   
   file.close();  
   return;
@@ -251,6 +250,8 @@ void EnergyScaleCorrection::readSmearingsFromFile(const std::string& filename)
     }
 
   }
+  
+  std::sort(smearings_.begin(),smearings_.end(),Sorter<CorrectionCategory,SmearCorrection>());
   
   file.close();
   return;

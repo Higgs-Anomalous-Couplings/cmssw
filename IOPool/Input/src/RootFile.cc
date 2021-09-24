@@ -527,7 +527,7 @@ namespace edm {
           newBranchToOldBranch_.insert(std::make_pair(newBD.branchName(), prod.branchName()));
         }
       }
-      dropOnInput(*newReg, productSelectorRules, dropDescendants, inputType);
+      // dropOnInput(*newReg, productSelectorRules, dropDescendants, inputType);
       if (inputType == InputType::SecondaryFile) {
         thinnedAssociationsHelper->updateFromSecondaryInput(*fileThinnedAssociationsHelper_,
                                                             *associationsFromSecondary);
